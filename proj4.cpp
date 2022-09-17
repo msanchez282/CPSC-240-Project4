@@ -98,8 +98,8 @@ int main() {
 		mov b, 0000000000001100;		// put in this binary to check bits 3 & 4
 		and b, ax;						// compares bits 3 and 4
 		shr b, 2;						// moves out come to the right to compare
-		cmp b, 0;
-		Je ram16;
+		cmp b, 0;						// the next few lines just compare all possibilities
+		Je ram16;						// of the size of ram
 		cmp b, 1;
 		Je ram32;
 		cmp b, 2;
@@ -119,7 +119,7 @@ int main() {
 		mov sizeOfRam, 64;
 		Jmp step2;
 	step2:
-		mov b, 0000000011000000b;
+		mov b, 0000000011000000b;		// here we compare for the floppy drives
 		and b, ax;
 		shr b, 6;
 		cmp b, 0;
@@ -130,7 +130,7 @@ int main() {
 		Je threeDrives;
 		cmp b, 3;
 		Je fourDrives;
-	oneDrive:
+	oneDrive:							// check all dloppy drive possibilites
 		mov numFloppyDrives, 1;
 		Jmp step3;
 	twoDrives:
@@ -142,11 +142,11 @@ int main() {
 	fourDrives:
 		mov numFloppyDrives, 4;
 		Jmp step3;
-	step3:
+	step3:								// check bits 15 and 16 for number of printers connected
 		mov b, 1100000000000000b;
 		and b, ax;
 		shr b, 14;
-		cmp b, 0;
+		cmp b, 0;						// check all printer possibilities
 		Je noPrinters;
 		cmp b, 1;
 		Je onePrinter;
@@ -174,12 +174,12 @@ int main() {
 
 	// Q2
 	_asm {
-		mov ax, 0xBEEF;
+		mov ax, 0xBEEF;						// starting with BEEF base 16
 		mov temp, 0000000000000001b;
 		and ax, temp;
-		cmp ax, 0;
-		Je validBeef;
-		cmp ax, 1;
+		cmp ax, 0;							// the only way a number can be odd in binary
+		Je validBeef;						// is if the digit on the far right is 1
+		cmp ax, 1;							// so we're checking for that for all 3 of our PINs
 		Je notValidBeef;
 	validBeef:
 		call beefIsValid;
@@ -247,11 +247,11 @@ int main() {
 	// find defective sprinklers
 		call defectiveSprinklersSetup;
 		mov a, 1000000000000000b;
-	startSecondLoopQ3:
-		mov bx, 0;
-		dec currentSprinkler;
-		cmp bx, currentSprinkler;
-		Je exitSecondLoopQ3;
+	startSecondLoopQ3:						// here we're starting a loop to check
+		mov bx, 0;							// each sprinkler one by one and starting with
+		dec currentSprinkler;				// 16 so we can display it in descending order
+		cmp bx, currentSprinkler;			// we initialize currentSprinkler to 17
+		Je exitSecondLoopQ3;				// so we can decrease and check at the beginning of the loop
 		mov ax, 0110101000101111b;
 		and ax, a;
 		cmp ax, 0;
@@ -273,9 +273,9 @@ int main() {
 		call base2;
 		call elevatorSetup;
 		mov a, 1000000000000000b;
-	startLoopQ4:
-		dec currentFloor;
-		mov bx, 0;
+	startLoopQ4:							// this is the same code as the last part 
+		dec currentFloor;					// of q3 except we have floors instead of
+		mov bx, 0;							// sprinklers
 		cmp bx, currentFloor;
 		Je exitLoopQ4;
 		mov ax, 1001000100001100b;
