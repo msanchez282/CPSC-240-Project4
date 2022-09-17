@@ -9,6 +9,7 @@ using namespace std;
 short a;
 void base2()
 {
+	cout << "AX = ";
 	short   x = 1 << 15, t, n = a;
 	for (int i = 1; i <= 16; ++i)
 	{
@@ -32,15 +33,61 @@ void base2()
 }
 
 
-//Q1 functions and declarations
+// Q1 functions and declarations
 
 short numPrinters, numFloppyDrives, sizeOfRam, b;
-
 void displayAll() {
 	cout << "The number of printers connected to the computer: " << numPrinters << endl;
 	cout << "The number if floppy drives: " << numFloppyDrives << endl;
 	cout << "The size of RAM: " << sizeOfRam << endl;
 }
+
+
+// Q2 functions and declarations
+
+short temp;
+void beefIsValid() {
+	cout << "BEEF is a valid ID for the family" << endl;
+}
+void beefNotValid() {
+	cout << "BEEF is not a valid ID for the family" << endl;
+}
+void fadeIsValid() {
+	cout << "FADE is a valid ID for the family" << endl;
+}
+void fadeNotValid() {
+	cout << "FADE is not a valid ID for the family" << endl;
+}
+void cabeIsValid() {
+	cout << "CABE is a valid ID for the family" << endl;
+}
+void cabeNotValid() {
+	cout << "CABE is not a valid ID for the family" << endl;
+}
+
+// Q3 functions and declarations
+
+short sprinklerCounter = 0, moveCounter = 0, maxMoves = 16, currentSprinkler = 17;
+void displayNumSprinklers() {
+	cout << sprinklerCounter << " sprinklers are ON" << endl;
+}
+void defectiveSprinklersSetup() {
+	cout << "Defective sprinklers: ";
+}
+void displayCurrentSprinkler() {
+	cout << currentSprinkler << " ";
+}
+
+// Q4 functions and declarations
+
+short currentFloor = 17;
+void elevatorSetup() {
+	cout << "Elevator will stop at floors no. ";
+}
+void displayCurrentFloor() {
+	cout << currentFloor << " ";
+}
+
 
 int main() {
 
@@ -48,9 +95,9 @@ int main() {
 
 	_asm {
 		mov ax, 1100111010011100b;
-		mov b, 0000000000001100;
-		and b, ax;
-		shr b, 2;
+		mov b, 0000000000001100;		// put in this binary to check bits 3 & 4
+		and b, ax;						// compares bits 3 and 4
+		shr b, 2;						// moves out come to the right to compare
 		cmp b, 0;
 		Je ram16;
 		cmp b, 1;
@@ -122,6 +169,129 @@ int main() {
 	displayQ1:
 		call displayAll;
 	}
+
+	cout << endl << endl;
+
+	// Q2
+	_asm {
+		mov ax, 0xBEEF;
+		mov temp, 0000000000000001b;
+		and ax, temp;
+		cmp ax, 0;
+		Je validBeef;
+		cmp ax, 1;
+		Je notValidBeef;
+	validBeef:
+		call beefIsValid;
+		Jmp checkFade;
+	notValidBeef:
+		call beefNotValid;
+	checkFade:
+		mov ax, 0;
+		mov ax, 0xFADE;
+		mov temp, 0000000000000001b;
+		and ax, temp;
+		cmp ax, 1;
+		Je notValidFade;
+		Jmp validFade;
+	notValidFade:
+		call fadeNotValid;
+		Jmp checkCabe;
+	validFade:
+		call fadeIsValid;
+	checkCabe:
+		mov ax, 0;
+		mov ax, 0xCABE;
+		mov temp, 0000000000000001b;
+		and ax, temp;
+		cmp ax, 1;
+		Je notValidCabe;
+		Jmp validCabe;
+	notValidCabe:
+		call cabeNotValid;
+		Jmp q2done;
+	validCabe:
+		call cabeIsValid;
+	q2done:
+	}
+
+	cout << endl << endl;
+
+	// Q3
+	_asm {
+		mov ax, 0110101000101111b;
+
+		// display as binary
+		mov a, ax;
+		call base2;
+		mov a, 0000000000000001b;
+		
+		// check if sprinklers are on
+		mov bx, maxMoves;
+	startLoopQ3:
+		inc moveCounter;
+		cmp bx, moveCounter;
+		Je exitLoopQ3;
+		mov ax, 0110101000101111b;
+		and ax, a;
+		cmp ax, 0;
+		Jne increaseCounter;				// jump to increment sprinklerCounter by 1
+		shl a, 1;							// if not just shift left and go again
+		Jmp startLoopQ3;
+	increaseCounter:
+		inc sprinklerCounter;
+		shl a, 1;
+		Jmp startLoopQ3;
+	exitLoopQ3:
+		call displayNumSprinklers;
+	// find defective sprinklers
+		call defectiveSprinklersSetup;
+		mov a, 1000000000000000b;
+	startSecondLoopQ3:
+		mov bx, 0;
+		dec currentSprinkler;
+		cmp bx, currentSprinkler;
+		Je exitSecondLoopQ3;
+		mov ax, 0110101000101111b;
+		and ax, a;
+		cmp ax, 0;
+		Je isDefective;
+		shr a, 1;
+		Jmp startSecondLoopQ3;
+	isDefective:
+		call displayCurrentSprinkler;
+		shr a, 1;
+		Jmp startSecondLoopQ3;
+	exitSecondLoopQ3:
+	}
+
+	cout << endl << endl;
+
+	// Q4
+	_asm {
+		mov a, 1001000100001100b;
+		call base2;
+		call elevatorSetup;
+		mov a, 1000000000000000b;
+	startLoopQ4:
+		dec currentFloor;
+		mov bx, 0;
+		cmp bx, currentFloor;
+		Je exitLoopQ4;
+		mov ax, 1001000100001100b;
+		and ax, a;
+		cmp ax, 0;
+		Jne willStop;
+		shr a, 1;
+		Jmp startLoopQ4;
+	willStop:
+		call displayCurrentFloor;
+		shr a, 1;
+		Jmp startLoopQ4;
+	exitLoopQ4:
+	}
+
+	cout << endl;
 
 
 	return 0;
